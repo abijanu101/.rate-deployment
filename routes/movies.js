@@ -50,4 +50,62 @@ router.post('/', async (req, res) => {
   }
 });
 
+
+// GET all movies with image and mean rating
+router.get('/', async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().execute('sp_GetMovies');
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+// GET movie by ID with image and director name
+router.get('/:id', async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().input('id', req.params.id).execute('sp_GetMovieById');
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+// PUT update movie
+router.put('/:id', async (req, res) => {
+  const { title, director, releasedOn, synopsis, imageName, imageType, imageBin } = req.body;
+  try {
+    const pool = await poolPromise;
+    await pool.request()
+      .input('id', req.params.id)
+      .input('title', title)
+      .input('director', director)
+      .input('releasedOn', releasedOn)
+      .input('synopsis', synopsis)
+      .input('imageName', imageName)
+      .input('imageType', imageType)
+      .input('imageBin', imageBin)
+      .execute('sp_UpdateMovie');
+    res.send('Movie updated successfully.');
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+// DELETE movie
+router.delete('/:id', async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    await pool.request().input('id', req.params.id).execute('sp_DeleteMovie');
+    res.send('Movie deleted successfully.');
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+
+
+
 module.exports = router;

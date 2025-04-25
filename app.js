@@ -4,14 +4,13 @@ const bodyParser = require('body-parser');
 const app = express();
 app.use(bodyParser.json());
 
-app.use('/people', require('./routes/people'));
-// app.use('/users', require('./routes/users'));
-app.use('/movies', require('./routes/movies'));
-app.use('/actors', require('./routes/actors'));
-app.use('/reviews', require('./routes/reviews'));
-// app.use('/images', require('./routes/images'));
+app.use('/people', require('./routes/people'));//redirect to people file
+// app.use('/users', require('./routes/users'));//redirect to users file
+app.use('/movies', require('./routes/movies'));//redirect to movies file
+app.use('/actors', require('./routes/actors'));//redirect to actors file
+app.use('/reviews', require('./routes/reviews'));//redirect to reviews file
+// app.use('/images', require('./routes/images'));//redirect to images file
 
 app.listen(3000, () => {
   console.log('🚀 Server running at http://localhost:3000');
 });
-
