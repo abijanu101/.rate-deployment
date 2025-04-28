@@ -17,8 +17,6 @@ function Navbar() {
 
 
     return (
-        <>
-
             <header className="w-full bg-gradient-to-r  from-teal-700 to-green-600/85 text-white text-center font-thin p-2">
                 <div className="flex gap-5 text-xl">
                     <Link className="flex gap-2" to="/home/">
@@ -50,9 +48,6 @@ function Navbar() {
                     }
                 </div>
             </header>
-
-            <Outlet />
-        </>
     )
 
 }

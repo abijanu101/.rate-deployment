@@ -8,16 +8,16 @@ function UserDDN() {
     const ddnRef = useRef();
 
     useEffect(() => {
-        //fetch all genre names
-
         const handleClickOutside = (event) => {
-            if (ddnRef && !ddnRef.current.contains(event.target))
+            if (ddnRef.current && !ddnRef.current.contains(event.target))
                 setIsOpen(false);
         }
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+        
+        if (ddnRef.current) {
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => document.removeEventListener("mousedown", handleClickOutside);
+        }
+    }, [isOpen]);
 
 
     return (
@@ -25,7 +25,7 @@ function UserDDN() {
             {!isOpen && <HiDotsVertical className="text-white/85 hover:text-white/100 cursor-pointer mt-1" onClick={() => setIsOpen(true)} />}
             {isOpen && <>
                 <BsTriangleFill className="text-white/85 hover:text-white/100 cursor-pointer rotate-180 text-sm mt-2.5" />
-                <div ref={ddnRef} className="text-left w-30 absolute top-13 right-2 backdrop-blur-sm rounded-md bg-gradient-to-r from-teal-50/65 to-green-50/30 text-green-700 border-2 border-green-700/80 shadow-md shadow-teal-700/20">
+                <div ref={ddnRef} className="text-left w-30 absolute top-13 right-2 backdrop-blur-sm rounded-md bg-gradient-to-r from-teal-50/95 to-green-50/70 text-green-700 border-2 border-green-700/80 shadow-md shadow-teal-700/20">
                     <ul className="w-full">
                         <div className="flex-col">
                             <Link className="block hover:bg-gradient-to-r hover:from-green-600/95 hover:to-green-500/85 hover:text-white w-full p-1 px-3" to={"/profile/"} onClick={() => setIsOpen(false)} >
