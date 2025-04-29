@@ -71,7 +71,6 @@ CREATE TABLE Actors (
 );
 
 -- AUTH
-
 CREATE TABLE Users(
 	id INT IDENTITY(1,1),
 	email VARCHAR(32) CHECK (
@@ -79,6 +78,7 @@ CREATE TABLE Users(
 		email NOT LIKE '%@.%' AND
 		email NOT LIKE '%@%@%'		
 	),
+	username VARCHAR(64) CHECK (username is NOT NULL),
 	pw VARCHAR(64) NOT NULL,
 	isAdmin CHAR(1) DEFAULT 'N' CHECK (isAdmin IN ('Y', 'N')),
 
@@ -99,11 +99,7 @@ CREATE TABLE Reviews (
 );
 
 
-
 GO
-
--- ----------------------------
-
 -- Inserts a new person into the People table
 -- Parameters: fname, lname (required), gender (defaults to '-'), dob (defaults to current date)
 CREATE PROCEDURE sp_InsertPerson
@@ -274,19 +270,27 @@ CREATE PROCEDURE sp_GetGenresByMovieID
 	@id INT
 AS	
 BEGIN
-	SELECT * FROM Movie_Genres
+	SELECT G.* 
+	FROM Movie_Genres M
+	JOIN Genre G
+	ON G.id = M.genre
 	WHERE movie = @id;
 END;
 GO
 
 -- Retrieves all reviews for a specific movie
 -- Parameter: movie (movie's ID)
+
 CREATE PROCEDURE sp_GetReviewsByMovieId
     @movie INT
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT * FROM Reviews WHERE movie = @movie;
+    SELECT U.id as author, U.username, rating, msg
+	FROM Reviews R
+	JOIN Users U
+	ON R.id = U.id
+	WHERE movie = @movie;
 END;
 GO
 
@@ -347,6 +351,25 @@ BEGIN
 END;
 GO
 
+-- for update querry
+CREATE PROCEDURE sp_MovieActors
+	@movie int
+AS
+BEGIN
+	DELETE FROM Actors
+	WHERE movie = @movie;
+END;
+GO
+
+CREATE PROCEDURE sp_WipeMovieGenres
+	@movie int
+AS
+BEGIN
+	DELETE FROM Movie_Genres
+	WHERE movie = @movie;
+END;
+
+GO
 -- Updates an actor's role (appearsAs) for a specific movie
 -- Parameters: movie (movie's ID), person (actor's ID), appearsAs (new role)
 CREATE PROCEDURE sp_UpdateActor

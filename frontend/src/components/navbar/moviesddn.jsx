@@ -3,18 +3,15 @@ import { useEffect, useRef, useState } from "react";
 import { BsTriangle, BsTriangleFill } from 'react-icons/bs';
 
 function MoviesDDN() {
-    const [genres, setGenres] = useState([
-        { id: "0", name: "Action" },
-        { id: "1", name: "Sci-Fi" },
-        { id: "2", name: "Thriller" },
-        { id: "3", name: "Horror" },
-        { id: "4", name: "Slice of Life" }
-    ]);
+    const [genres, setGenres] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const ddnRef = useRef();
 
     useEffect(() => {
-        //fetch all genre names
+        fetch(import.meta.env.VITE_BACKENDURL + '/genres/', { method: "GET" })
+            .then(res => res.json())
+            .then(res => setGenres(res))
+            .catch(err => console.error(err));
 
         const handleClickOutside = (event) => {
             if (ddnRef.current && !ddnRef.current.contains(event.target))
@@ -39,7 +36,7 @@ function MoviesDDN() {
                             {genres.map((i, index) => {
                                 return (
                                     <li key={index} className='w-full'>
-                                        <Link className="block hover:bg-gradient-to-r hover:from-teal-700/85 hover:to-green-600/85 hover:text-white w-full p-1 px-3" to={"/g/" + i.id} onClick={() => setIsOpen(false)} >
+                                        <Link className="transition-colors duration-200 block hover:bg-gradient-to-r hover:from-teal-700/85 hover:to-green-600/85 hover:text-white w-full p-1 px-3" to={"/g/" + i.id} onClick={() => setIsOpen(false)} >
                                             {i.name}
                                         </Link>
                                     </li>
@@ -47,7 +44,7 @@ function MoviesDDN() {
                             })}
                         </div>
                         <div className="border-t border-t-green-700/50">
-                            <Link className="block hover:bg-gradient-to-r hover:from-teal-700/85 hover:to-green-600/85 hover:text-white w-full p-1 px-3" to={"/m/create"} onClick={() => setIsOpen(false)} >
+                            <Link className="transition-colors duration-400 block hover:bg-gradient-to-r hover:from-amber-700/85 hover:to-yellow-500/85 hover:shadow-amber-500 hover:text-white w-full p-1 px-3" to={"/m/create"} onClick={() => setIsOpen(false)} >
                                 Add Movie
                             </Link>
                         </div>

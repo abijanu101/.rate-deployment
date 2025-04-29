@@ -4,7 +4,7 @@ const { sql, poolPromise } = require('../db'); // Import from db.js
 
 // POST /reviews
 router.post('/', async (req, res) => {
-  const { movie, id, rating } = req.body;
+  const { movie, id, rating, msg } = req.body;
 
   try {
     const pool = await poolPromise;
@@ -12,6 +12,7 @@ router.post('/', async (req, res) => {
       .input('movie', sql.Int, movie)
       .input('id', sql.Int, id)
       .input('rating', sql.Int, rating)
+      .input('msg', sql.VarChar(sql.MAX), msg)
       .execute('sp_InsertReview');
 
     res.status(200).json({ message: 'Review inserted successfully', result: result.recordset });
