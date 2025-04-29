@@ -32,7 +32,7 @@ function ReviewForm(props) {
     }
 
     useEffect(() => {
-
+        
     }, []);
 
     return (
@@ -41,7 +41,7 @@ function ReviewForm(props) {
             <p className="text-2xl text-white/75 text-center mb-5">Let the world know what you think...</p>
 
             {props.user ? <>
-                <p className="flex text-3xl text-center justify-center-safe gap-1 text-amber-500 ">
+                <p className="flex text-3xl text-center justify-center-safe gap-3 text-amber-500 active:brightness-105">
                     {[1, 2, 3, 4, 5].map((i) => (
                         <span
                             key={i}
@@ -49,7 +49,7 @@ function ReviewForm(props) {
                             onMouseLeave={onHoverExitHandler}  // Hover exit event
                             onClick={() => onClickHandler(i)}  // Click event
                         >
-                            {starsVisible >= i ? <FaStar /> : <FaRegStar />}
+                            {starsVisible >= i ? <FaStar className="cursor-pointer"/> : <FaRegStar />}
                         </span>
                     ))}
                 </p>

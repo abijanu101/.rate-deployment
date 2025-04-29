@@ -11,18 +11,7 @@ function Movie() {
     // initializing contents
 
     const params = useParams(); // use params.movieID to send initial fetch request
-    const [movie, setMovie] = useState({
-        title: 'Movie Name',
-        details: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eos sunt dolorum voluptas quia labore quaerat, voluptatibus in dicta expedita ipsam, optio ab rem veritatis vel voluptate mollitia non, autem accusantium.",
-        coverArt: null,
-        director: { id: '0', fname: 'John', lname: 'Doe' },
-        actors: [
-            { id: '1', fname: "Emma", lname: 'Watson', as: "Jesse" },
-            { id: '2', fname: "Alex", lname: 'Bull', as: "Holly" },
-            { id: '3', fname: "Thomas", lname: 'Jefferson', as: "Bill" }
-        ],
-        releaseDate: "2004/03/12"
-    });
+    const [movie, setMovie] = useState();
     const [reviews, setReviews] = useState(
         [
             { author: '1', fname: 'Commenter', lname: 'Name', rating: '5', body: 'Great Movie fr fr' },
@@ -51,10 +40,25 @@ function Movie() {
     function handleDelete() {
 
     }
-
     // Use Effect
-
     useEffect(() => {
+        fetch(import.meta.env.VITE_BACKENDURL + '/movies/' + params.movieID, { method: 'GET' })
+            .then(res => res.json())
+            .then(res => {
+                const buffer = new Uint8Array(res.imageBin.data);
+                const blob = new Blob([buffer], { type: res.imageMIME });
+                const url = URL.createObjectURL(blob);
+                console.log(blob);
+                setMovie({
+                    title: res.title,
+                    details: res.synopsis,
+                    coverArt: url,
+                    director: { id: res.director, fname: res.directorFname, lname: res.directorLname },
+                    actors: res.actors,
+                    releaseDate: res.releasedOn.slice(0, 10)
+                });
+            })
+            .catch(err => console.error(err));
         // fetch movie using params.movieID
         // fetch reviews using params.movieID
         // fetch user using login
@@ -89,7 +93,7 @@ function Movie() {
                                                 {movie.actors.map((i, index) =>
                                                     <li key={index}>-&gt;&nbsp;
                                                         <Link className="underline cursor-pointer" to={"/p/" + i.id}>
-                                                            {i.fname} {i.lname}</Link> as {i.as}
+                                                            {i.fname} {i.lname}</Link> as {i.appearsAs}
                                                     </li>
                                                 )}
                                             </ul>

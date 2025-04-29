@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsFillPlusCircleFill } from "react-icons/bs";
 import { RiDeleteBinFill } from "react-icons/ri";
+import { meta } from "@eslint/js";
 
 // figure out genre submission
 
@@ -11,27 +12,18 @@ function AddMovie() {
     const [file, setFile] = useState(); // image file binary
     const date = useRef();
     const synopsis = useRef();
+    const director = useRef();
     const [actors, setActors] = useState([]);
     const [genres, setGenres] = useState([]);
 
     // actors stuff
-    const [allActors, setAllActors] = useState([
-        { 'actorID': '0', 'fname': 'Hello', 'lname': 'World' },
-        { 'actorID': '1', 'fname': 'Bye', 'lname': 'Hell' },
-        { 'actorID': '2', 'fname': 'Abi', 'lname': '' },
-        { 'actorID': '3', 'fname': 'Joe', 'lname': 'Biden' }
-    ]);
+    const [people, setPeople] = useState([]);
     const actorChosen = useRef();
     const actorRole = useRef();
     const actorsPKGen = useRef(0); // the actors needs a primary key because actorID may be repeated incase of double roles
 
     // genre stuff
-    const [allGenres, setAllGenres] = useState([
-        { 'id': '1', 'name': 'Action' },
-        { 'id': '2', 'name': 'Adventure' },
-        { 'id': '3', 'name': 'Thriller' },
-        { 'id': '4', 'name': 'Horror' }
-    ]);
+    const [allGenres, setAllGenres] = useState([]);
     const genreChosen = useRef();
 
     // other view stuff
@@ -39,6 +31,21 @@ function AddMovie() {
     const [feedback, setFeedback] = useState([]);
 
     const navigate = useNavigate();
+
+    // initialization
+
+    useEffect(() => {
+        fetch(import.meta.env.VITE_BACKENDURL + '/people/', { method: "GET" })
+            .then(res => res.json())
+            .then(res => setPeople(res))
+            .catch(err => console.error(err));
+
+        fetch(import.meta.env.VITE_BACKENDURL + '/genres/', { method: "GET" })
+            .then(res => res.json())
+            .then(res => setAllGenres(res))
+            .catch(err => console.error(err));
+    }, []);
+
 
     // ----------------------------- handlers ----------------------------- 
 
@@ -56,13 +63,13 @@ function AddMovie() {
             return;
         setFeedback([]);
 
-        const actorChosenDetails = allActors.find((i) => i.actorID == actorChosen.current.value);
+        const actorChosenDetails = people.find((i) => i.id == actorChosen.current.value);
 
         setActors((prev) => {
             let result = prev;
             result.push({
                 'pk': actorsPKGen.current++,
-                'actorID': actorChosenDetails.actorID,
+                'actorID': actorChosenDetails.id,
                 'fname': actorChosenDetails.fname,
                 'lname': actorChosenDetails.lname,
                 'as': actorRole.current.value
@@ -83,7 +90,7 @@ function AddMovie() {
     }
     function handleGenreAddition() {
         const genreChosenDetails = allGenres.find((i) => i.id == genreChosen.current.value);
-        if(!genreChosenDetails)
+        if (!genreChosenDetails)
             return;
 
         setGenres((prev) => {
@@ -136,22 +143,29 @@ function AddMovie() {
         setFeedback(string);
 
         if (string.length === 0) {
-        console.log("submit pressed");
+            console.log("submit pressed");
 
             setFeedback([]);
             const formData = new FormData();
             formData.append('title', title.current.value);
+            formData.append('director', director.current.value);
             formData.append('image', file);
-            formData.append('release_date', date.current.value);
+            formData.append('releasedOn', date.current.value);
             formData.append('synopsis', synopsis.current.value);
-            formData.append('actors', actors);
-            formData.append('genres', genres);
+            formData.append('actors', JSON.stringify(actors));
+            formData.append('genres', JSON.stringify(genres));
 
-            // post here
-            navigate('/m/');
+            // POST
+            fetch(import.meta.env.VITE_BACKENDURL + "/movies/", {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(res => { console.log(res); navigate('/m/' + res.id); })
+                .catch(err => console.error(err));
         }
-        
     }
+
 
     // ----------------------------- html ----------------------------- 
 
@@ -180,13 +194,24 @@ function AddMovie() {
                     <div className="flex-1 shrink-1">
                         <textarea placeholder="Plot Synopsis" className="w-full h-25 p-2 border-green-800 border-2 rounded-md" ref={synopsis} />
 
+                        <section className="p-5">
+                            <h2 className="text-2xl font-semibold text-teal-700 ">Director</h2>
+                            <div className="flex flex-row justify-center">
+                                <select ref={director} className="w-40">
+                                    {
+                                        people.map((i, index) => <option key={index} value={i.id}>{i.fname} {i.lname}</option>)
+                                    }
+                                </select>
+                            </div>
+                        </section>
+
                         {/* actors */}
                         <section className="p-5">
                             <h2 className="text-2xl font-semibold text-teal-700 ">Cast</h2>
 
                             <div className="flex flex-row gap-3 mt-5 justify-center">
                                 <select className="w-40 border-teal-700" ref={actorChosen}>
-                                    {allActors.map((i, index) => <option key={index} value={i.actorID}>{i.fname} {i.lname}</option>)}
+                                    {people.map((i, index) => <option key={index} value={i.id}>{i.fname} {i.lname}</option>)}
                                 </select>
                                 <i className="text-teal-700">as</i>
                                 <input type="text" className="w-35 border-b border-green-800" ref={actorRole} />
