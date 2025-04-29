@@ -7,9 +7,11 @@ node_modules/
 # Log files
 *.log
 
+
 # OS files
 .DS_Store
 Thumbs.db
+
 
 # VS Code workspace settings (optional)
 .vscode/
