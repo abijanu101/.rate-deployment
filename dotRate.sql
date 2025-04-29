@@ -1,6 +1,6 @@
 USE master;
 GO
-DROP DATABASE dotRate;
+--DROP DATABASE dotRate;
 GO
 CREATE DATABASE dotRate;
 GO
@@ -91,6 +91,7 @@ CREATE TABLE Reviews (
 	movie INT,
 	id INT,
 	rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+	msg VARCHAR(MAX),
 
 	CONSTRAINT pk_review PRIMARY KEY(movie, id),
 	CONSTRAINT fk_review_movie FOREIGN KEY(movie) REFERENCES Movies(id),
@@ -98,16 +99,6 @@ CREATE TABLE Reviews (
 );
 
 
--- !! MOCK DATA
-
-
--- USERS
-INSERT INTO Users (email, pw, isAdmin) VALUES
-('user1@example.com', 'hashed_pw_1', 'N'),
-('admin@example.com', 'hashed_pw_2', 'Y'),
-('critic@example.com', 'hashed_pw_3', 'N'),
-('viewer@example.com', 'hashed_pw_4', 'N'),
-('reviewer@example.com', 'hashed_pw_5', 'N');
 
 GO
 
@@ -198,12 +189,13 @@ GO
 CREATE PROCEDURE sp_InsertReview
     @movie INT,
     @id INT,
-    @rating INT
+    @rating INT,
+	@msg VARCHAR(MAX)
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT INTO Reviews (movie, id, rating)
-    VALUES (@movie, @id, @rating);
+    INSERT INTO Reviews (movie, id, rating, msg)
+    VALUES (@movie, @id, @rating, @msg);
 END;
 GO
 
