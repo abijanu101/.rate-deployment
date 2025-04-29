@@ -12,14 +12,7 @@ function Movie() {
 
     const params = useParams(); // use params.movieID to send initial fetch request
     const [movie, setMovie] = useState();
-    const [reviews, setReviews] = useState(
-        [
-            { author: '1', fname: 'Commenter', lname: 'Name', rating: '5', body: 'Great Movie fr fr' },
-            { author: '2', fname: 'Literally', lname: 'Me', rating: '3', body: 'Had its moments' },
-            { author: '3', fname: 'Skibidius', lname: 'Tolietus', rating: '1', body: 'CHICKEN JOCKEYYY!!!!' },
-            { author: '4', fname: 'Not', lname: 'Cool', rating: '3', body: 'Sad :(' },
-        ]);
-
+    const [reviews, setReviews] = useState([]);
     const [user, setUser] = useState(
         { username: "abijanu101", isAdmin: 'Y' }
     )
@@ -36,33 +29,47 @@ function Movie() {
 
         return result;
     }
-
+    function calculateAverageRating() {
+        let sum = 0;
+        for (const d of reviews)
+            sum += d.rating;
+        return sum / reviews.length;
+    }
     function handleDelete() {
 
     }
+
     // Use Effect
     useEffect(() => {
         fetch(import.meta.env.VITE_BACKENDURL + '/movies/' + params.movieID, { method: 'GET' })
             .then(res => res.json())
             .then(res => {
-                const buffer = new Uint8Array(res.imageBin.data);
-                const blob = new Blob([buffer], { type: res.imageMIME });
-                const url = URL.createObjectURL(blob);
-                console.log(blob);
-                setMovie({
-                    title: res.title,
-                    details: res.synopsis,
-                    coverArt: url,
-                    director: { id: res.director, fname: res.directorFname, lname: res.directorLname },
-                    actors: res.actors,
-                    releaseDate: res.releasedOn.slice(0, 10)
-                });
+                fetch(import.meta.env.VITE_BACKENDURL + '/genres/' + params.movieID, { method: 'GET' })
+                    .then((res) => res.json())
+                    .then((genresRes) => {
+                        console.log(res);
+                        const buffer = new Uint8Array(res.imageBin.data);
+                        const blob = new Blob([buffer], { type: res.imageMIME });
+                        const url = URL.createObjectURL(blob);
+                        setMovie({
+                            title: res.title,
+                            details: res.synopsis,
+                            coverArt: url,
+                            director: { id: res.director, fname: res.directorFname, lname: res.directorLname },
+                            actors: res.actors,
+                            genres: genresRes,
+                            releaseDate: res.releasedOn.slice(0, 10)
+                        });
+                    })
+                    .catch(err => console.error(err));
             })
             .catch(err => console.error(err));
-        // fetch movie using params.movieID
+        fetch(import.meta.env.VITE_BACKENDURL + '/reviews/' + params.movieID, { method: 'GET' })
+            .then(res => res.json())
+            .then(res => setReviews(res))
+            .catch(err => console.error(err));
         // fetch reviews using params.movieID
         // fetch user using login
-
 
     }, []);
 
@@ -83,20 +90,42 @@ function Movie() {
                                         </span>
                                     </>}
                                 </div>
+                                <div className="px-2 pt-4 flex flex-row gap-3">
+                                    {reviews[0] && <div className="flex flex-row text-2xl text-green-700 gap-1">
+                                        {starsFromNumber(Math.round(calculateAverageRating()))}
+                                    </div>}
+                                    <p className="text-xl -mt-0.5">({reviews.length} reviews)</p>
+                                </div>
                                 <div className="p-3">
                                     <h2 className="text-2xl font-semibold text-teal-700">Synopsis:</h2>
                                     <p>{movie.details}</p>
-                                    <div className="flex py-5">
+                                    <div className="flex py-5 gap-5">
                                         <div className="w-70">
-                                            <h2 className="text-2xl font-semibold text-teal-700">Actors:</h2>
-                                            <ul>
-                                                {movie.actors.map((i, index) =>
-                                                    <li key={index}>-&gt;&nbsp;
-                                                        <Link className="underline cursor-pointer" to={"/p/" + i.id}>
-                                                            {i.fname} {i.lname}</Link> as {i.appearsAs}
+                                            <h2 className="text-2xl font-semibold text-teal-700">Genres:</h2>
+                                            <ul className="flex flex-row gap-2">
+                                                {movie.genres[0] ?
+                                                    movie.genres.map((i, index) =>
+                                                        <li key={index}><Link className="underline cursor-pointer" to={"/g/" + i.id}>
+                                                            {i.gname}</Link>
+                                                        </li>
+                                                    ) : <li>
+                                                        None Added
                                                     </li>
-                                                )}
+                                                }
                                             </ul>
+                                            <h2 className="text-2xl font-semibold text-teal-700  mt-5">Actors:</h2>
+                                            <ul>
+                                                {movie.actors[0] ?
+                                                    movie.actors.map((i, index) =>
+                                                        <li key={index}>-&gt;&nbsp;
+                                                            <Link className="underline cursor-pointer" to={"/p/" + i.id}>
+                                                                {i.fname} {i.lname}</Link> as {i.appearsAs}
+                                                        </li>
+                                                    ) :
+                                                    <li>None Listed</li>
+                                                }
+                                            </ul>
+
                                         </div>
                                         <div>
                                             <h2 className="text-2xl font-semibold text-teal-700">Director:</h2>
@@ -122,13 +151,13 @@ function Movie() {
                         <div className="border m-5 rounded-md border-green-700 bg-green-100/50" key={index}>
                             <div className="flex p-2 bg-gradient-to-r from-teal-800 to-green-800 text-white/80">
                                 <span className="flex-1 font-semibold">
-                                    <Link to={"u/" + i.id}>{i.fname} {i.lname}</Link>
+                                    <Link to={"/u/" + i.author}>{i.username}</Link>
                                 </span>
                                 <div className=" flex text-amber-500 shadow-amber-600">
                                     {starsFromNumber(i.rating).map((i, index) => <span key={index}>{i}</span>)}
                                 </div>
                             </div>
-                            <p className="p-2">{i.body}</p>
+                            <p className="p-2">{i.msg}</p>
                         </div>
                     )}
                 </section>

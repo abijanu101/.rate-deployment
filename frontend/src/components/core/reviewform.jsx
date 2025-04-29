@@ -26,6 +26,7 @@ function ReviewForm(props) {
         const review = {
             token: "jwtTokenHere",
             movie: props.movieID,
+            rating: starsGiven.current.value,
             body: textAreaRef.current.value
         }
         console.log(review);

@@ -93,20 +93,56 @@ router.get('/:id', async (req, res) => {
 });
 
 // PUT update movie
-router.put('/:id', async (req, res) => {
-  const { title, director, releasedOn, synopsis, imageName, imageType, imageBin } = req.body;
+router.put('/:id', upload.single('image'), async (req, res) => {
   try {
     const pool = await poolPromise;
+
+    const { id, title, director, releasedOn, synopsis } = req.body;
+    const imageName = req.file.originalname;
+    const imageBuffer = req.file.buffer;
+    const imageMIME = req.file.mimetype;
+
+    // Validate required fields
+    if (!title || !director || !releasedOn || !synopsis || !imageBuffer || !imageMIME) {
+      throw new Error('Missing required fields (title, director, releasedOn, synopsis)');
+    }
+
     await pool.request()
-      .input('id', req.params.id)
-      .input('title', title)
-      .input('director', director)
-      .input('releasedOn', releasedOn)
-      .input('synopsis', synopsis)
-      .input('imageName', imageName)
-      .input('imageType', imageType)
-      .input('imageBin', imageBin)
+      .input('id', sql.Int, id)
+      .input('title', sql.VarChar(64), title)
+      .input('director', sql.Int, director)
+      .input('releasedOn', sql.Date, releasedOn)
+      .input('synopsis', sql.Text, synopsis)
+      .input('imageName', sql.VarChar(64), imageName)
+      .input('imageType', sql.VarChar(32), imageMIME)
+      .input('imageBin', sql.VarBinary(sql.MAX), imageBuffer)
       .execute('sp_UpdateMovie');
+
+    await pool.request()
+      .input('movie', req.params.id)
+      .execute('sp_WipeMovieGenres');
+
+    await pool.request()
+      .input('movie', req.params.id)
+      .execute('sp_WipeMovieActors');
+
+    // store actor-movie relationships
+    for (const actor of await JSON.parse(req.body.actors)) {
+      await pool.request()
+        .input('person', sql.Int, actor.actorID)
+        .input('movie', sql.Int, id)
+        .input('appearsAs', sql.VarChar(64), actor.appearsAs)
+        .execute('sp_InsertActor');
+    };
+
+    // store genre-movie relationships
+    for (const genre of await JSON.parse(req.body.genres)) {
+      await pool.request()
+        .input('movieID', sql.Int, id)
+        .input('genreID', sql.Int, genre.id)
+        .execute('sp_AssignGenre');
+    };
+
     res.send('Movie updated successfully.');
   } catch (err) {
     res.status(500).send(err.message);
