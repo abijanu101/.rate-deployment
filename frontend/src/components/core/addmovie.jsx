@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BsFillPlusCircleFill } from "react-icons/bs";
 import { RiDeleteBinFill } from "react-icons/ri";
-import { meta } from "@eslint/js";
 
 // figure out genre submission
 

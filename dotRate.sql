@@ -352,7 +352,7 @@ END;
 GO
 
 -- for update querry
-CREATE PROCEDURE sp_MovieActors
+CREATE PROCEDURE sp_WipeMovieActors
 	@movie int
 AS
 BEGIN
@@ -419,6 +419,8 @@ CREATE PROCEDURE sp_DeleteMovie
     @id INT
 AS
 BEGIN
+	DELETE FROM Movie_Genres WHERE movie = @id;
+	DELETE FROM Actors WHERE movie = @id;
     SET NOCOUNT ON;
     DELETE FROM Movies WHERE id = @id;
 END;

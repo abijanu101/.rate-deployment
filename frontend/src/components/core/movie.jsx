@@ -9,7 +9,7 @@ import NotFound from "../essentials/notfound";
 
 function Movie() {
     // initializing contents
-
+    const navigate = useNavigate();
     const params = useParams(); // use params.movieID to send initial fetch request
     const [movie, setMovie] = useState();
     const [reviews, setReviews] = useState([]);
@@ -36,7 +36,9 @@ function Movie() {
         return sum / reviews.length;
     }
     function handleDelete() {
-
+        fetch(import.meta.env.VITE_BACKENDURL + '/movies/' + params.movieID, { method: 'DELETE' })
+            .then(() => navigate('/m/'))
+            .catch((err) => console.err(err));
     }
 
     // Use Effect
@@ -84,8 +86,8 @@ function Movie() {
                                     <h1 className="text-5xl flex-1 p-5 border-green-800">{movie.title}</h1>
                                     {user.isAdmin == 'Y' && <>
                                         <span className="text-4xl mt-8 flex gap-2">
-                                            <Link className="hover:rotate-0 rotate-5 transition-all duration-300" to={"/m/edit/" + params.movieID}><BiEdit /></Link>
-                                            <span className="hover:rotate-0 rotate-5 transition-all duration-300"><BiTrash onClick={handleDelete} /></span>
+                                            <Link className="hover:rotate-0 rotate-5 transition-all duration-300 hover:text-green-800" to={"/m/edit/" + params.movieID}><BiEdit /></Link>
+                                            <span className="hover:rotate-0 rotate-5 transition-all duration-300 hover:text-red-800 "><BiTrash onClick={handleDelete} /></span>
 
                                         </span>
                                     </>}
