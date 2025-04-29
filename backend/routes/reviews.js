@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { sql, poolPromise } = require('../db'); // Import from db.js
+const { verifyToken } = require('../auth');
 
-// POST /reviews
-router.post('/', async (req, res) => {
-  const { movie, id, rating, msg } = req.body;
+//Post Reviews
+router.post('/', verifyToken, async (req, res) => {
+  const { movie, rating, msg } = req.body;
+  const id = req.user.id; // from token
 
   try {
     const pool = await poolPromise;
@@ -22,20 +24,11 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET reviews by movie ID
-router.get('/:movieId', async (req, res) => {
-  try {
-    const pool = await poolPromise;
-    const result = await pool.request().input('movie', req.params.movieId).execute('sp_GetReviewsByMovieId');
-    res.json(result.recordset);
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
 
-// PUT update review rating
-router.put('/', async (req, res) => {
-  const { movie, id, rating } = req.body;
+router.put('/', verifyToken, async (req, res) => {
+  const { movie, rating } = req.body;
+  const id = req.user.id;
+
   try {
     const pool = await poolPromise;
     await pool.request()
@@ -49,9 +42,11 @@ router.put('/', async (req, res) => {
   }
 });
 
-// DELETE review
-router.delete('/', async (req, res) => {
-  const { movie, id } = req.body;
+//Delete Review
+router.delete('/', verifyToken, async (req, res) => {
+  const { movie } = req.body;
+  const id = req.user.id;
+
   try {
     const pool = await poolPromise;
     await pool.request()
@@ -63,5 +58,6 @@ router.delete('/', async (req, res) => {
     res.status(500).send(err.message);
   }
 });
+
 
 module.exports = router;
