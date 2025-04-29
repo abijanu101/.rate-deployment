@@ -33,4 +33,12 @@ router.post('/login', async (req, res) => {
     }
 });
 
+const verifyToken = require('../auth');
+
+router.get('/me', verifyToken, (req, res) => {
+  const { id, email, isAdmin } = req.user;
+  res.json({ id, email, isAdmin });
+});
+
+
 module.exports = router;
