@@ -41,7 +41,7 @@ function UserDDN() {
                         </div>
                         <div className="border-t border-t-green-700/50">
                             <Link className="block hover:bg-gradient-to-r hover:from-green-600/95 hover:to-green-500/85 hover:text-white w-full p-1 px-3"
-                                to={"/login/"} onClick={() => { logout(); setIsOpen(false) }} >
+                                to={"/login/"} onClick={() => { logout(); }} >
                                 Logout
                             </Link>
                         </div>

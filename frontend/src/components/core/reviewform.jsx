@@ -1,14 +1,39 @@
 import Button from "../commons/button";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { FaRegStar, FaStar } from "react-icons/fa";
+import { AuthContext } from "../../contexts";
 
 
 function ReviewForm(props) {
     // stars interface
-
     const starsGiven = useRef(1);
     const [starsVisible, setStarsVisible] = useState(1);
 
+    // form submission
+    const textAreaRef = useRef();
+    const {token} = useContext(AuthContext);
+
+    function handleSubmission() {
+        try{
+        fetch(import.meta.env.VITE_BACKENDURL + '/reviews/', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Auth-Token': token
+            },
+            body: JSON.stringify({
+                movie: props.movieID,
+                rating: starsGiven.current,
+                msg: textAreaRef.current.value
+            })
+        })
+            .then(res => console.log(res))
+            .catch(err => console.error(err));
+    } catch(err) {console.error(err)}
+    }
+
+    
+    // helpers
     function onHoverHandler(n) {
         setStarsVisible(n);
     }
@@ -19,21 +44,8 @@ function ReviewForm(props) {
         starsGiven.current = n;
     }
 
-    // form submission
-    const textAreaRef = useRef();
-
-    function handleSubmission() {
-        const review = {
-            token: "jwtTokenHere",
-            movie: props.movieID,
-            rating: starsGiven.current.value,
-            body: textAreaRef.current.value
-        }
-        console.log(review);
-    }
-
     useEffect(() => {
-        
+
     }, []);
 
     return (
@@ -50,7 +62,7 @@ function ReviewForm(props) {
                             onMouseLeave={onHoverExitHandler}  // Hover exit event
                             onClick={() => onClickHandler(i)}  // Click event
                         >
-                            {starsVisible >= i ? <FaStar className="cursor-pointer"/> : <FaRegStar />}
+                            {starsVisible >= i ? <FaStar className="cursor-pointer" /> : <FaRegStar />}
                         </span>
                     ))}
                 </p>
@@ -60,10 +72,10 @@ function ReviewForm(props) {
                     <Button className="block flex-1" text="Submit" onClick={handleSubmission} />
                     <div className="w-full"></div>
                 </div>
-            </>: <div className="flex align-middle justify-center">
-                <Button dest="/login/" text="Sign In Now"/>
+            </> : <div className="flex align-middle justify-center">
+                <Button dest="/login/" text="Sign In Now" />
             </div>}
-            
+
 
         </section>
     )

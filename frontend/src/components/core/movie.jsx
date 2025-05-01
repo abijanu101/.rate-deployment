@@ -2,32 +2,23 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { BsCameraReels, BsCameraReelsFill } from "react-icons/bs";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ButtonFilled from "../commons/buttonFilled";
-import { FaRegStar, FaStar } from "react-icons/fa";
+import { starsFromNumber } from "../../helpers/starsFromNumber";
 import { BiEdit, BiTrash } from "react-icons/bi";
 import ReviewForm from "./reviewform";
 import NotFound from "../essentials/notfound";
 import { AuthContext } from "../../contexts";
 
 function Movie() {
-    // initializing contents
     const navigate = useNavigate();
     const params = useParams(); // use params.movieID to send initial fetch request
+    const { user } = useContext(AuthContext);
+
     const [movie, setMovie] = useState();
     const [reviews, setReviews] = useState([]);
-    const { user } = useContext(AuthContext);
+    const [userReview, setUserReview] = useState([]);
 
     // Helpers
 
-    function starsFromNumber(number) {
-        let result = [];
-        for (let i = 0; i < number; ++i)
-            result.push(<FaStar key={i} />);
-
-        for (; number < 5; ++number)
-            result.push(<FaRegStar key={i} />);
-
-        return result;
-    }
     function calculateAverageRating() {
         let sum = 0;
         for (const d of reviews)
@@ -40,7 +31,7 @@ function Movie() {
             .catch((err) => console.err(err));
     }
 
-    // Use Effect
+    // Load Data
     useEffect(() => {
         fetch(import.meta.env.VITE_BACKENDURL + '/movies/' + params.movieID, { method: 'GET' })
             .then(res => res.json())
@@ -48,7 +39,6 @@ function Movie() {
                 fetch(import.meta.env.VITE_BACKENDURL + '/genres/' + params.movieID, { method: 'GET' })
                     .then((res) => res.json())
                     .then((genresRes) => {
-                        console.log(res);
                         const buffer = new Uint8Array(res.imageBin.data);
                         const blob = new Blob([buffer], { type: res.imageMIME });
                         const url = URL.createObjectURL(blob);
@@ -65,14 +55,34 @@ function Movie() {
                     .catch(err => console.error(err));
             })
             .catch(err => console.error(err));
-        fetch(import.meta.env.VITE_BACKENDURL + '/reviews/' + params.movieID, { method: 'GET' })
-            .then(res => res.json())
-            .then(res => setReviews(res))
-            .catch(err => console.error(err));
-        // fetch reviews using params.movieID
-        // fetch user using login
 
+
+        fetch(import.meta.env.VITE_BACKENDURL + '/reviews/movies/' + params.movieID, { method: 'GET' })
+            .then(res => res.json())
+            .then(res => setReviews(() => res))
+            .catch(err => console.error(err));
     }, []);
+
+    useEffect(() => {
+        if (!reviews[0]) return;
+        if (!user) {
+            if (userReview)
+                setReviews((prev) => [...prev, userReview]);
+            setUserReview({});
+        }
+        else {
+            setReviews((prev) => {
+                let result = [];
+                for (const r of prev) {
+                    if (r.id === user.id)
+                        setUserReview(r);
+                    else
+                        result.push(r);
+                }
+                return result;
+            });
+        }
+    }, [user]);
 
     if (movie)
         return (
@@ -93,7 +103,7 @@ function Movie() {
                                 </div>
                                 <div className="px-2 pt-4 flex flex-row gap-3">
                                     {reviews[0] && <div className="flex flex-row text-2xl text-green-700 gap-1">
-                                        {starsFromNumber(Math.round(calculateAverageRating()))}
+                                        {starsFromNumber(Math.round(calculateAverageRating()), -1)}
                                     </div>}
                                     <p className="text-xl -mt-0.5">({reviews.length} reviews)</p>
                                 </div>
@@ -150,7 +160,7 @@ function Movie() {
                 <section className="p-10 ">
                     {reviews.map((i, index) =>
                         <div className="border m-5 rounded-md border-green-700 bg-green-100/50" key={index}>
-                            <div className="flex p-2 bg-gradient-to-r from-teal-800 to-green-800 text-white/80">
+                            <div className="flex p-2 bg-gradient-to-r from-teal-700 to-green-700/85 text-white/80">
                                 <span className="flex-1 font-semibold">
                                     <Link to={"/u/" + i.author}>{i.username}</Link>
                                 </span>
