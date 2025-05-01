@@ -1,3 +1,5 @@
+const router = require('express').Router();
+
 // GET actors by movie ID
 router.get('/:movieId', async (req, res) => {
   try {
@@ -39,3 +41,5 @@ router.delete('/', async (req, res) => {
     res.status(500).send(err.message);
   }
 });
+
+module.exports = router;
