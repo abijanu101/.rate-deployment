@@ -1,5 +1,6 @@
+-- ============ Insertion Procedures ============ 
+
 -- Inserts a new person into the People table
--- Parameters: fname, lname (required), gender (defaults to '-'), dob (defaults to current date)
 CREATE PROCEDURE sp_InsertPerson
     @fname VARCHAR(32),
     @lname VARCHAR(32),
@@ -14,9 +15,7 @@ END;
 GO
 
 -- Inserts a new movie into the Movies table, along with its image in the Images table
--- Parameters: title, director, releasedOn, synopsis for the movie; imageType, imageBin for the image
 -- Output: Returns the ID of the inserted image
-
 CREATE PROCEDURE sp_InsertMovie
     @title VARCHAR(64),
     @director INT,
@@ -51,10 +50,9 @@ BEGIN
 	INSERT INTO Genre
 	VALUES(@name);
 END;
-
 GO
+
 -- Adds an actor to a specific movie in the Actors table
--- Parameters: person (actor's ID), movie (movie's ID), appearsAs (role of the actor)
 CREATE PROCEDURE sp_InsertActor
     @person INT,
     @movie INT,
@@ -79,7 +77,6 @@ END;
 GO
 
 -- Adds a review for a specific movie in the Reviews table
--- Parameters: movie (movie's ID), id (user's ID), rating (1 to 5)
 CREATE PROCEDURE sp_InsertReview
     @movie INT,
     @id INT,
@@ -93,10 +90,9 @@ BEGIN
 END;
 GO
 
--- Retrieval Procedures
+-- ============  Retrieval Procedures ============ 
 
 -- Retrieves all people with their IDs, first names, last names, and average movie rating
--- Joins People, Actors, and Reviews to calculate the mean rating of movies each person is involved in
 CREATE PROCEDURE sp_GetPeople
 AS
 BEGIN
@@ -110,7 +106,6 @@ END;
 GO
 
 -- Retrieves all details for a specific person by their ID
--- Parameter: id (person's ID)
 CREATE PROCEDURE sp_GetPersonById
     @id INT
 AS
@@ -121,7 +116,6 @@ END;
 GO
 
 -- Retrieves all movies with their titles, cover image, and average rating
--- Joins Movies, Images, and Reviews to get the image and calculate the mean rating
 CREATE PROCEDURE sp_GetMovies
 AS
 BEGIN
@@ -135,7 +129,6 @@ END;
 GO
 
 -- Retrieves detailed info for a specific movie, including title, image, synopsis, and director's name
--- Parameter: id (movie's ID)
 CREATE PROCEDURE sp_GetMovieById
     @id INT
 AS
@@ -150,7 +143,6 @@ END;
 GO
 
 -- Retrieves the list of actors for a specific movie, including their names and roles
--- Parameter: id (movie's ID)
 CREATE PROCEDURE sp_GetActorsByMovieId
     @id INT
 AS
@@ -177,8 +169,6 @@ END;
 GO
 
 -- Retrieves all reviews for a specific movie
--- Parameter: movie (movie's ID)
-
 CREATE PROCEDURE sp_GetReviewsByMovieId
     @movie INT
 AS
@@ -192,10 +182,9 @@ BEGIN
 END;
 GO
 
--- Update Procedures
+-- ============  Update Procedures ============ 
 
 -- Updates a person's details (first name, last name, gender, date of birth)
--- Parameters: id (person's ID), fname, lname, gender, dob (all optional)
 CREATE PROCEDURE sp_UpdatePerson
     @id INT,
     @fname VARCHAR(32) = NULL,
@@ -215,7 +204,6 @@ END;
 GO
 
 -- Updates a movie's details (title, director, release date, synopsis) and optionally adds a new image
--- Parameters: id (movie's ID), title, director, releasedOn, synopsis, imageName, imageType, imageBin (all optional)
 CREATE PROCEDURE sp_UpdateMovie
     @id INT,
     @title VARCHAR(64) = NULL,
@@ -249,7 +237,7 @@ BEGIN
 END;
 GO
 
--- for update querry
+-- Removes all Actor Relationships to a Movie
 CREATE PROCEDURE sp_WipeMovieActors
 	@movie int
 AS
@@ -259,6 +247,7 @@ BEGIN
 END;
 GO
 
+-- Removes all Genre Tags from a Movie
 CREATE PROCEDURE sp_WipeMovieGenres
 	@movie int
 AS
@@ -268,8 +257,8 @@ BEGIN
 END;
 
 GO
+
 -- Updates an actor's role (appearsAs) for a specific movie
--- Parameters: movie (movie's ID), person (actor's ID), appearsAs (new role)
 CREATE PROCEDURE sp_UpdateActor
     @movie INT,
     @person INT,
@@ -284,7 +273,6 @@ END;
 GO
 
 -- Updates a review's rating for a specific movie
--- Parameters: movie (movie's ID), id (user's ID), rating (new rating)
 CREATE PROCEDURE sp_UpdateReview
     @movie INT,
     @id INT,
@@ -298,10 +286,9 @@ BEGIN
 END;
 GO
 
--- Deletion Procedures
+-- ============ Deletion Procedures ============ 
 
 -- Deletes a person from the People table
--- Parameter: id (person's ID)
 CREATE PROCEDURE sp_DeletePerson
     @id INT
 AS
@@ -312,7 +299,6 @@ END;
 GO
 
 -- Deletes a movie from the Movies table
--- Parameter: id (movie's ID)
 CREATE PROCEDURE sp_DeleteMovie
     @id INT
 AS
@@ -325,7 +311,6 @@ END;
 GO
 
 -- Removes an actor from a specific movie in the Actors table
--- Parameters: movie (movie's ID), person (actor's ID)
 CREATE PROCEDURE sp_DeleteActor
     @movie INT,
     @person INT
@@ -338,7 +323,6 @@ END;
 GO
 
 -- Deletes a review for a specific movie
--- Parameters: movie (movie's ID), id (user's ID)
 CREATE PROCEDURE sp_DeleteReview
     @movie INT,
     @id INT
