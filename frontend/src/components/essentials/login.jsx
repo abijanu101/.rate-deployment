@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import ButtonFilled from "../commons/buttonFilled";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { AuthContext } from "../../contexts";
 
 function Login() {
     const navigate = useNavigate();
@@ -8,6 +9,7 @@ function Login() {
     const email = useRef();
     const password = useRef();
 
+    const { login } = useContext(AuthContext);
     const [feedback, setFeedback] = useState('');
 
     function handleSubmit() {
@@ -27,10 +29,10 @@ function Login() {
                 .then(async res => {
                     if (res.status >= 200 && res.status < 300) {
                         const body = await res.json();
-                        localStorage.setItem('token', body.token);
-                        navigate('/m/');
+                        login(body.token);
+                        navigate('/home/');
                     }
-                    else {  
+                    else {
                         const body = await res.json();
                         setFeedback(body.message);
                     }

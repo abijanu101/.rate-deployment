@@ -3,6 +3,21 @@ const router = express.Router();
 const { sql, poolPromise } = require('../db'); // Import from db.js
 const { verifyToken } = require('../auth');
 
+router.get('/:movieID', async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await ((await pool.request())
+      .input('movieID', sql.Int, req.params.movieID)
+      .query('SELECT id, rating, msg FROM Reviews WHERE movie = @movieID'));
+
+    res.status(200).send(result.recordset);
+  }
+  catch(err) {
+    res.status(500).send(err);
+  }
+
+})
+
 //Post Reviews
 router.post('/', verifyToken, async (req, res) => {
   const { movie, rating, msg } = req.body;

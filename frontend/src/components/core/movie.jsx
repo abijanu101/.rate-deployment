@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { BsCameraReels, BsCameraReelsFill } from "react-icons/bs";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ButtonFilled from "../commons/buttonFilled";
@@ -6,6 +6,7 @@ import { FaRegStar, FaStar } from "react-icons/fa";
 import { BiEdit, BiTrash } from "react-icons/bi";
 import ReviewForm from "./reviewform";
 import NotFound from "../essentials/notfound";
+import { AuthContext } from "../../contexts";
 
 function Movie() {
     // initializing contents
@@ -13,19 +14,17 @@ function Movie() {
     const params = useParams(); // use params.movieID to send initial fetch request
     const [movie, setMovie] = useState();
     const [reviews, setReviews] = useState([]);
-    const [user, setUser] = useState(
-        { username: "abijanu101", isAdmin: 'Y' }
-    )
+    const { user } = useContext(AuthContext);
 
     // Helpers
 
     function starsFromNumber(number) {
         let result = [];
         for (let i = 0; i < number; ++i)
-            result.push(<FaStar />);
+            result.push(<FaStar key={i} />);
 
         for (; number < 5; ++number)
-            result.push(<FaRegStar />);
+            result.push(<FaRegStar key={i} />);
 
         return result;
     }
@@ -84,7 +83,7 @@ function Movie() {
                             <div className="flex-1 shrink">
                                 <div className="border-b-2 flex">
                                     <h1 className="text-5xl flex-1 p-5 border-green-800">{movie.title}</h1>
-                                    {user.isAdmin == 'Y' && <>
+                                    {user && user.isAdmin && <>
                                         <span className="text-4xl mt-8 flex gap-2">
                                             <Link className="hover:rotate-0 rotate-5 transition-all duration-300 hover:text-green-800" to={"/m/edit/" + params.movieID}><BiEdit /></Link>
                                             <span className="hover:rotate-0 rotate-5 transition-all duration-300 hover:text-red-800 "><BiTrash onClick={handleDelete} /></span>
