@@ -1,8 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ButtonFilled from "../commons/buttonFilled";
 import { useRef, useState } from "react";
 
 function Signup() {
+    const navigate = useNavigate();
+
     const email = useRef();
     const username = useRef();
     const password = useRef();
@@ -15,15 +17,29 @@ function Signup() {
             setFeedback('All Fields Are Required!');
         else if (password.current.value != confirmation.current.value)
             setFeedback('Password does not match!');
-        else if (
-            false
-            // here, check if email is duplicate
-        )
-            setFeedback('This email is already under use!');
         else {
             setFeedback('');
-        }
+            fetch(import.meta.env.VITE_BACKENDURL + '/users/signup', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email.current.value,
+                    username: username.current.value,
+                    password: password.current.value
+                })
+            })
+                .then(res => {
+                    if (res.status >= 400 && res.status < 500)
+                        setFeedback(async () => (await res.json()).msg);
+                    else if (res.status >= 200 && res.status < 300)
+                        navigate('/login');
 
+                })
+                .then(res => console.log(res))
+                .catch(err => console.log(err));
+        }
     }
 
 
@@ -45,7 +61,7 @@ function Signup() {
                     <input ref={password} type="password" placeholder="Password" className="p-2 border-green-800 border-2 rounded-md flex-1 mb-5" />
                     <input ref={confirmation} type="password" placeholder="Confirm Password" className="p-2 border-green-800 border-2 rounded-md flex-1" />
                 </div>
-                
+
                 {feedback != '' &&
                     <div className="bg-rose-100/50 text-rose-800/80 cursor-not-allowed mx-10 rounded-lg my-5 p-2 border-rose-800/50 border-2 border-dashed">
                         {feedback}

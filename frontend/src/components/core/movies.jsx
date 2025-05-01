@@ -34,7 +34,8 @@ function Movies() {
             {movies && movies.map((i, index) =>
                 <Link
                     to={'/m/' + i.id}
-                    className="w-md p-5 border-4 hover:bg-teal-700 hover:from-teal-800 brightness-95 hover:brightness-100 hover:to-green-700/50 hover:text-white text-green-800 hover:shadow-lg shadow-teal-900/50 transition-all duration-300 from-teal-100 to-green-50 bg-conic-150 border-green-800/30 hover:border-green-800/100 cursor-pointer  flex gap-8" key={index}
+                    className="w-md p-5 border-4 hover:bg-teal-700 hover:from-teal-800 brightness-95 hover:brightness-100 hover:to-green-700/50 hover:text-white text-green-800 hover:shadow-lg shadow-teal-900/50 transition-all duration-300 from-teal-100 to-green-50 bg-conic-150 border-green-800/30 hover:border-green-800/100 cursor-pointer  flex gap-8"
+                    key={index}
                 >
                     <img
                         className="w-44 h-66 shadow-md shadow-green-900"

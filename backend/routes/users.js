@@ -33,8 +33,31 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.post('/signup', async (req, res) => {
+    {
+        const { email, username, password } = req.body;
 
-
+        const pool = await poolPromise;
+        // check if email in use
+        const result = await pool.request()
+            .input('email', sql.VarChar(sql.MAX), email)
+            .query('SELECT * FROM Users WHERE @email = email')
+        if (result.recordset.length > 0)
+            res.status(400).send({ msg: "Email already In Use" });
+        else {
+            // sign up fr now
+            try {
+                await pool.request()
+                    .input('email', sql.VarChar(sql.Max), email)
+                    .input('username', sql.VarChar(sql.Max), username)
+                    .input('pw', sql.VarChar(sql.Max), password)
+                    .query("INSERT INTO Users (email, username, pw) VALUES (@email, @username, @pw)");
+                res.status(200).send({ msg: 'Signed up successfully' });
+            }
+            catch (err) { res.status(400).send({ msg: 'Invalid Email Format!', err: err }) }
+        }
+    }
+});
 
 
 const { verifyToken } = require('../auth');
