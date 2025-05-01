@@ -1,7 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const { poolPromise } = require('../db');
+const { sql, poolPromise } = require('../db');
 
 router.post('/login', async (req, res) => {
     const { email, pw } = req.body;
@@ -9,8 +9,8 @@ router.post('/login', async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .input('email', email)
-            .input('pw', pw)
+            .input('email', sql.VarChar(sql.MAX), email)
+            .input('pw', sql.VarChar(sql.MAX), pw)
             .query('SELECT id, isAdmin FROM Users WHERE email = @email AND pw = @pw');
 
         if (result.recordset.length === 0) {
@@ -33,12 +33,23 @@ router.post('/login', async (req, res) => {
     }
 });
 
-const {verifyToken} = require('../auth');
 
-router.get('/me', verifyToken, (req, res) => {
-  const { id, email, isAdmin } = req.user;
-  res.json({ id, email, isAdmin });
+
+
+
+const { verifyToken } = require('../auth');
+
+router.get('/me', verifyToken, async (req, res) => {
+    const { id } = req.user;
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('id', sql.Int, id)
+            .query('SELECT id, username, isAdmin FROM Users WHERE id = @id');
+        res.json(result.recordset[0]);
+    }
+    catch (e) { res.status(500).send(e); }
+
 });
-
 
 module.exports = router;

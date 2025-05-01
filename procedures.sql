@@ -1,3 +1,5 @@
+USE dotRate;
+SELECT * FROM Reviews;
 -- ============ Insertion Procedures ============ 
 
 -- Inserts a new person into the People table
