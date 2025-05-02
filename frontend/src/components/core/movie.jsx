@@ -14,16 +14,19 @@ function Movie() {
     const { user } = useContext(AuthContext);
 
     const [movie, setMovie] = useState();
-    const [reviews, setReviews] = useState([]);
-    const [userReview, setUserReview] = useState([]);
-
+    const reviews = useRef([]);
+    const [userReview, setUserReview] = useState({});
+    const [reviewsFetched, setReviewsFetched] = useState(false);
     // Helpers
 
     function calculateAverageRating() {
         let sum = 0;
-        for (const d of reviews)
+        for (const d of reviews.current)
             sum += d.rating;
-        return sum / reviews.length;
+        if (userReview.current)
+            sum += userReview.current.rating;
+
+        return sum / (reviews.current.length + (userReview.current ? 1 : 0));
     }
     function handleDelete() {
         fetch(import.meta.env.VITE_BACKENDURL + '/movies/' + params.movieID, { method: 'DELETE' })
@@ -59,30 +62,28 @@ function Movie() {
 
         fetch(import.meta.env.VITE_BACKENDURL + '/reviews/movies/' + params.movieID, { method: 'GET' })
             .then(res => res.json())
-            .then(res => setReviews(() => res))
+            .then(res => {
+                reviews.current = res;
+                setReviewsFetched(true);
+            })
             .catch(err => console.error(err));
+
     }, []);
 
     useEffect(() => {
-        if (!reviews[0]) return;
-        if (!user) {
-            if (userReview)
-                setReviews((prev) => [...prev, userReview]);
-            setUserReview({});
-        }
+        if (!reviewsFetched || !user) return;
         else {
-            setReviews((prev) => {
-                let result = [];
-                for (const r of prev) {
-                    if (r.id === user.id)
-                        setUserReview(r);
-                    else
-                        result.push(r);
-                }
-                return result;
-            });
+            let result = [];
+            for (const r of reviews.current) {
+                if (r.id === user.id)
+                    userReview.current = r;
+                else
+                    result.push(r);
+            }
+            reviews.current = [...result];
         }
-    }, [user]);
+    }, [user, reviewsFetched])
+
 
     if (movie)
         return (
@@ -102,10 +103,10 @@ function Movie() {
                                     </>}
                                 </div>
                                 <div className="px-2 pt-4 flex flex-row gap-3">
-                                    {reviews[0] && <div className="flex flex-row text-2xl text-green-700 gap-1">
+                                    {reviews.current[0] && <div className="flex flex-row text-2xl text-green-700 gap-1">
                                         {starsFromNumber(Math.round(calculateAverageRating()), -1)}
                                     </div>}
-                                    <p className="text-xl -mt-0.5">({reviews.length} reviews)</p>
+                                    <p className="text-xl -mt-0.5">({reviews.current.length + (userReview.current ? 1 : 0)} reviews)</p>
                                 </div>
                                 <div className="p-3">
                                     <h2 className="text-2xl font-semibold text-teal-700">Synopsis:</h2>
@@ -155,10 +156,10 @@ function Movie() {
                     </div>
                 </section>
 
-                <ReviewForm movieID={params.movieID} user={user} />
+                <ReviewForm movieID={params.movieID} user={user} userReview={userReview} reviewsFetched={reviewsFetched} />
 
                 <section className="p-10 ">
-                    {reviews.map((i, index) =>
+                    {reviews.current.map((i, index) =>
                         <div className="border m-5 rounded-md border-green-700 bg-green-100/50" key={index}>
                             <div className="flex p-2 bg-gradient-to-r from-teal-700 to-green-700/85 text-white/80">
                                 <span className="flex-1 font-semibold">

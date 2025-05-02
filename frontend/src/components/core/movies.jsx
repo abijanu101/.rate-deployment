@@ -34,9 +34,9 @@ function Movies() {
                         <div className="flex flex-col gap-1">
                             <h2 className="block text-2xl font-semibold overflow-ellipsis border-b border-green-800">{i.title}</h2>
                             <div className="w-full overflow-ellipsis text-xl text-amber-500 flex">
-                                {starsFromNumber(Math.round(i.meanRating), index)}
+                                {starsFromNumber( Math.round(i.meanRating), index)}
                                 <p>&nbsp;</p>
-                                <p className="-mt-1 text-lg">{i.meanRating}</p>
+                                <p className="-mt-1 text-lg">{Math.round(100 * i.meanRating) / 100}</p>
                             </div>
                             <div>Lorem ipsum dolor sit amet </div>
                         </div>

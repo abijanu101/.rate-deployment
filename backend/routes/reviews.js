@@ -13,26 +13,32 @@ router.get('/movies/:movieID', async (req, res) => {
       .query('SELECT U.id, username, rating, msg FROM Reviews R JOIN Users U ON U.id = R.id WHERE R.movie = @movieID');
     res.status(200).send(result.recordset);
   }
-  catch(err) {
+  catch (err) {
     console.error(err);
     res.status(500).send(err);
   }
 })
 
-//Post Reviews
+//Post Reviews (also handles updation by deleting old review)
 router.post('/', verifyToken, async (req, res) => {
   const { movie, rating, msg } = req.body;
   const id = req.user.id; // from token
 
-
   try {
     const pool = await poolPromise;
-    const result = await pool.request()
+    // check for existing reviews
+    await (await (pool.request())
+      .input('movie', sql.Int, movie)
+      .input('id', sql.Int, id)
+      .query('DELETE FROM Reviews WHERE (movie = @movie AND id = @id)')
+    );
+
+    const result = await (await (pool.request())
       .input('movie', sql.Int, movie)
       .input('id', sql.Int, id)
       .input('rating', sql.Int, rating)
       .input('msg', sql.VarChar(sql.MAX), msg)
-      .execute('sp_InsertReview');
+      .execute('sp_InsertReview'));
 
     res.status(200).json({ message: 'Review inserted successfully', result: result.recordset });
   } catch (err) {
@@ -41,23 +47,6 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
-// update
-router.put('/', verifyToken, async (req, res) => {
-  const { movie, rating } = req.body;
-  const id = req.user.id;
-
-  try {
-    const pool = await poolPromise;
-    await pool.request()
-      .input('movie', movie)
-      .input('id', id)
-      .input('rating', rating)
-      .execute('sp_UpdateReview');
-    res.send('Review updated successfully.');
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
-});
 
 //Delete Review
 router.delete('/', verifyToken, async (req, res) => {
