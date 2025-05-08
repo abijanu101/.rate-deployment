@@ -94,7 +94,7 @@ function Movie() {
                             <div className="flex-1 shrink">
                                 <div className="border-b-2 flex">
                                     <h1 className="text-5xl flex-1 p-5 border-green-800">{movie.title}</h1>
-                                    {user && user.isAdmin && <>
+                                    {user && user.isAdmin == 'Y' && <>
                                         <span className="text-4xl mt-8 flex gap-2">
                                             <Link className="hover:rotate-0 rotate-5 transition-all duration-300 hover:text-green-800" to={"/m/edit/" + params.movieID}><BiEdit /></Link>
                                             <span className="hover:rotate-0 rotate-5 transition-all duration-300 hover:text-red-800 "><BiTrash onClick={handleDelete} /></span>
