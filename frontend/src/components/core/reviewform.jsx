@@ -1,14 +1,52 @@
 import Button from "../commons/button";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { FaRegStar, FaStar } from "react-icons/fa";
+import { AuthContext } from "../../contexts";
 
 
 function ReviewForm(props) {
     // stars interface
-
     const starsGiven = useRef(1);
     const [starsVisible, setStarsVisible] = useState(1);
 
+    // form submission
+    const textAreaRef = useRef();
+    const { token } = useContext(AuthContext);
+    const [editing, setEditing] = useState(false);
+
+    function handleSubmission() {
+        try {
+            fetch(import.meta.env.VITE_BACKENDURL + '/reviews/', {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Auth-Token': token
+                },
+                body: JSON.stringify({
+                    movie: props.movieID,
+                    rating: starsGiven.current,
+                    msg: textAreaRef.current.value
+                })
+            })
+                .then(res => console.log(res))
+                .catch(err => console.error(err));
+        } catch (err) { console.error(err) }
+        window.location.reload();
+    }
+
+    // update existing review interface
+    useEffect(() => {
+        const userReview = props.userReview.current;
+        if (!userReview) return;
+
+        starsGiven.current = userReview.rating;
+        setStarsVisible(starsGiven.current);
+        textAreaRef.current.value = userReview.msg;
+        setEditing(true);
+    }, [props.userReview.current, props.reviewsFetched]);
+
+
+    // helpers
     function onHoverHandler(n) {
         setStarsVisible(n);
     }
@@ -19,26 +57,9 @@ function ReviewForm(props) {
         starsGiven.current = n;
     }
 
-    // form submission
-    const textAreaRef = useRef();
-
-    function handleSubmission() {
-        const review = {
-            token: "jwtTokenHere",
-            movie: props.movieID,
-            rating: starsGiven.current.value,
-            body: textAreaRef.current.value
-        }
-        console.log(review);
-    }
-
-    useEffect(() => {
-        
-    }, []);
-
     return (
         <section className="bg-gradient-to-r from-teal-700 to-green-700/80 p-10">
-            <h2 className="text-4xl text-white text-center mb-2">Leave a Review!</h2>
+            <h2 className="text-4xl text-white text-center mb-2">{editing ? "Changed Your Mind?": "Leave a Review!" }</h2>
             <p className="text-2xl text-white/75 text-center mb-5">Let the world know what you think...</p>
 
             {props.user ? <>
@@ -50,20 +71,20 @@ function ReviewForm(props) {
                             onMouseLeave={onHoverExitHandler}  // Hover exit event
                             onClick={() => onClickHandler(i)}  // Click event
                         >
-                            {starsVisible >= i ? <FaStar className="cursor-pointer"/> : <FaRegStar />}
+                            {starsVisible >= i ? <FaStar className="cursor-pointer" /> : <FaRegStar />}
                         </span>
                     ))}
                 </p>
                 <textarea ref={textAreaRef} type="text" className="w-full my-5 bg-gradient-to-r duration-1000 transition-colors from-teal-700/10 to-green-700/10 hover:from-teal-700/0 hover:to-green-700/0 bg-white p-5 border border-green-800" placeholder="Enter review text here..." />
                 <div className="flex flex-row w-full">
-                    <div className="w-full"></div>
-                    <Button className="block flex-1" text="Submit" onClick={handleSubmission} />
+                    <div className="w-full"></div>                    
+                    <Button className={"block flex-1"} text={editing ? "Update": "Submit"} onClick={handleSubmission} />
                     <div className="w-full"></div>
                 </div>
-            </>: <div className="flex align-middle justify-center">
-                <Button dest="/login/" text="Sign In Now"/>
+            </> : <div className="flex align-middle justify-center">
+                <Button dest="/login/" text="Sign In Now" />
             </div>}
-            
+
 
         </section>
     )

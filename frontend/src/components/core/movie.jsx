@@ -1,45 +1,40 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { BsCameraReels, BsCameraReelsFill } from "react-icons/bs";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import ButtonFilled from "../commons/buttonFilled";
-import { FaRegStar, FaStar } from "react-icons/fa";
+import { starsFromNumber } from "../../helpers/starsFromNumber";
 import { BiEdit, BiTrash } from "react-icons/bi";
 import ReviewForm from "./reviewform";
 import NotFound from "../essentials/notfound";
+import { AuthContext } from "../../contexts";
 
 function Movie() {
-    // initializing contents
-
+    const navigate = useNavigate();
     const params = useParams(); // use params.movieID to send initial fetch request
-    const [movie, setMovie] = useState();
-    const [reviews, setReviews] = useState([]);
-    const [user, setUser] = useState(
-        { username: "abijanu101", isAdmin: 'Y' }
-    )
+    const { user } = useContext(AuthContext);
 
+    const [movie, setMovie] = useState();
+    const reviews = useRef([]);
+    const [userReview, setUserReview] = useState({});
+    const [reviewsFetched, setReviewsFetched] = useState(false);
     // Helpers
 
-    function starsFromNumber(number) {
-        let result = [];
-        for (let i = 0; i < number; ++i)
-            result.push(<FaStar />);
-
-        for (; number < 5; ++number)
-            result.push(<FaRegStar />);
-
-        return result;
-    }
     function calculateAverageRating() {
         let sum = 0;
-        for (const d of reviews)
+        for (const d of reviews.current)
             sum += d.rating;
-        return sum / reviews.length;
+        if (userReview.current)
+            sum += userReview.current.rating;
+
+        return sum / (reviews.current.length + (userReview.current ? 1 : 0));
     }
     function handleDelete() {
-
+        fetch(import.meta.env.VITE_BACKENDURL + '/movies/' + params.movieID, { method: 'DELETE' })
+            .then(() => navigate('/m/'))
+            .catch((err) => console.err(err));
     }
 
-    // Use Effect
+    // Load Data
     useEffect(() => {
         fetch(import.meta.env.VITE_BACKENDURL + '/movies/' + params.movieID, { method: 'GET' })
             .then(res => res.json())
@@ -47,7 +42,6 @@ function Movie() {
                 fetch(import.meta.env.VITE_BACKENDURL + '/genres/' + params.movieID, { method: 'GET' })
                     .then((res) => res.json())
                     .then((genresRes) => {
-                        console.log(res);
                         const buffer = new Uint8Array(res.imageBin.data);
                         const blob = new Blob([buffer], { type: res.imageMIME });
                         const url = URL.createObjectURL(blob);
@@ -64,14 +58,32 @@ function Movie() {
                     .catch(err => console.error(err));
             })
             .catch(err => console.error(err));
-        fetch(import.meta.env.VITE_BACKENDURL + '/reviews/' + params.movieID, { method: 'GET' })
+
+
+        fetch(import.meta.env.VITE_BACKENDURL + '/reviews/movies/' + params.movieID, { method: 'GET' })
             .then(res => res.json())
-            .then(res => setReviews(res))
+            .then(res => {
+                reviews.current = res;
+                setReviewsFetched(true);
+            })
             .catch(err => console.error(err));
-        // fetch reviews using params.movieID
-        // fetch user using login
 
     }, []);
+
+    useEffect(() => {
+        if (!reviewsFetched || !user) return;
+        else {
+            let result = [];
+            for (const r of reviews.current) {
+                if (r.id === user.id)
+                    userReview.current = r;
+                else
+                    result.push(r);
+            }
+            reviews.current = [...result];
+        }
+    }, [user, reviewsFetched])
+
 
     if (movie)
         return (
@@ -82,19 +94,19 @@ function Movie() {
                             <div className="flex-1 shrink">
                                 <div className="border-b-2 flex">
                                     <h1 className="text-5xl flex-1 p-5 border-green-800">{movie.title}</h1>
-                                    {user.isAdmin == 'Y' && <>
+                                    {user && user.isAdmin && <>
                                         <span className="text-4xl mt-8 flex gap-2">
-                                            <Link className="hover:rotate-0 rotate-5 transition-all duration-300" to={"/m/edit/" + params.movieID}><BiEdit /></Link>
-                                            <span className="hover:rotate-0 rotate-5 transition-all duration-300"><BiTrash onClick={handleDelete} /></span>
+                                            <Link className="hover:rotate-0 rotate-5 transition-all duration-300 hover:text-green-800" to={"/m/edit/" + params.movieID}><BiEdit /></Link>
+                                            <span className="hover:rotate-0 rotate-5 transition-all duration-300 hover:text-red-800 "><BiTrash onClick={handleDelete} /></span>
 
                                         </span>
                                     </>}
                                 </div>
                                 <div className="px-2 pt-4 flex flex-row gap-3">
-                                    {reviews[0] && <div className="flex flex-row text-2xl text-green-700 gap-1">
-                                        {starsFromNumber(Math.round(calculateAverageRating()))}
+                                    {reviews.current[0] && <div className="flex flex-row text-2xl text-green-700 gap-1">
+                                        {starsFromNumber(Math.round(calculateAverageRating()), -1)}
                                     </div>}
-                                    <p className="text-xl -mt-0.5">({reviews.length} reviews)</p>
+                                    <p className="text-xl -mt-0.5">({reviews.current.length + (userReview.current ? 1 : 0)} reviews)</p>
                                 </div>
                                 <div className="p-3">
                                     <h2 className="text-2xl font-semibold text-teal-700">Synopsis:</h2>
@@ -144,12 +156,12 @@ function Movie() {
                     </div>
                 </section>
 
-                <ReviewForm movieID={params.movieID} user={user} />
+                <ReviewForm movieID={params.movieID} user={user} userReview={userReview} reviewsFetched={reviewsFetched} />
 
                 <section className="p-10 ">
-                    {reviews.map((i, index) =>
+                    {reviews.current.map((i, index) =>
                         <div className="border m-5 rounded-md border-green-700 bg-green-100/50" key={index}>
-                            <div className="flex p-2 bg-gradient-to-r from-teal-800 to-green-800 text-white/80">
+                            <div className="flex p-2 bg-gradient-to-r from-teal-700 to-green-700/85 text-white/80">
                                 <span className="flex-1 font-semibold">
                                     <Link to={"/u/" + i.author}>{i.username}</Link>
                                 </span>

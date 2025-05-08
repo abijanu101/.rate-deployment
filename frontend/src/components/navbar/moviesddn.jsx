@@ -30,7 +30,7 @@ function MoviesDDN() {
             {!isOpen && <BsTriangle className="text-white/85 hover:text-white/100 cursor-pointer rotate-180 text-sm mt-2.5" onClick={() => setIsOpen(true)} />}
             {isOpen && <>
                 <BsTriangleFill className="text-white/85 hover:text-white/100 cursor-pointer rotate-180 text-sm mt-2.5" />
-                <div ref={ddnRef} className="text-left w-50 absolute top-13 left-20 backdrop-blur-sm rounded-md bg-gradient-to-r from-teal-50/95 to-green-50/70 text-green-700 border-2 border-green-700/80 shadow-md shadow-teal-700/20">
+                <div ref={ddnRef} className="z-50 text-left w-50 absolute top-13 left-20 backdrop-blur-sm rounded-md bg-gradient-to-r from-teal-50/95 to-green-50/70 text-green-700 border-2 border-green-700/80 shadow-md shadow-teal-700/20">
                     <ul className="w-full">
                         <div className="flex-col">
                             {genres.map((i, index) => {
