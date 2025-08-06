@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}-deployment
+spec:
+  replicas: {{ .Values.replicaCount | int }}
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+    spec:
+      containers:
+      - name: {{ .Values.name }}
+        image: {{ .Values.image }}
+        ports:
+        - containerPort: {{ .Values.containerPort }}
+        env:
+          {{- range $key, $val := .Values.env.config}}
+          - name: {{ $key | quote }}
+            valueFrom:
+              configMapKeyRef:
+                name: "{{ $.Values.name }}-config"
+                key: {{ $key | quote }}
+          {{- end }}
+          
+          {{- range $key, $val := .Values.env.secrets}}
+          - name: {{ $key | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: "{{ $.Values.name }}-secret"
+                key: {{ $key | quote }}
+          {{- end }}
+      {{- if .Values.initContainers }}
+      initContainers:
+      {{- range .Values.initContainers }}
+      - name: {{ .name }}
+        image: {{ .image }}
+        command: ["/bin/sh", "-c", "{{ .commands | join " && " }}"]
+      {{- end}}
+      {{- end}}

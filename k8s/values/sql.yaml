@@ -1,0 +1,28 @@
+name: sql
+image: mcr.microsoft.com/mssql/server:2019-latest
+replicaCount: 1
+
+port: 1433
+containerPort: 1433
+
+env:
+  config:
+    ACCEPT_EULA: "Y"
+  secrets:
+    MSSQL_SA_PASSWORD: Qwerty123
+
+jobs:
+- name: sql-init
+  restartPolicy: Never 
+  containers:
+  - name: sql-init
+    image: abijanu101/dr-sql-init
+    commands:
+    - until sqlcmd -S sql -U SA -P Qwerty123 -Q 'CREATE DATABASE dotRate'; do echo Waiting for SQL Server...; sleep 3; done
+    - echo Database Set Up Starting...
+    - sqlcmd -S sql -U SA -P Qwerty123 -d dotRate  -i /initScripts/schema.sql
+    - echo Schema Constructed!
+    - sqlcmd -S sql -U SA -P Qwerty123 -d dotRate -i /initScripts/procedures.sql
+    - echo Stored Procedures Created!
+    - sqlcmd -S sql -U SA -P Qwerty123 -d dotRate -i /initScripts/mockData.sql
+    - echo Database Set Up Complete!

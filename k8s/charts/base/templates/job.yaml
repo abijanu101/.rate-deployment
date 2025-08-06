@@ -1,0 +1,18 @@
+{{- range $index, $job := .Values.jobs }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .name }}-job-{{ $index }}
+spec:
+  ttlSecondsAfterFinished: 120
+  template:
+    spec:
+      restartPolicy: {{ .restartPolicy }}
+      containers:
+      {{- range .containers }}
+      - name: {{ .name }}
+        image: {{ .image }}
+        command: ["/bin/sh", "-c", "{{ .commands | join " && " }}"]
+      {{- end }}
+---
+{{- end}}

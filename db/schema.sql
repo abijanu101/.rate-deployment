@@ -1,9 +1,3 @@
-USE master;
-GO
---DROP DATABASE dotRate;
-GO
-CREATE DATABASE dotRate;
-GO
 USE dotRate;
 GO
 
@@ -19,8 +13,10 @@ CREATE TABLE Images (
 	CONSTRAINT pk_images PRIMARY KEY (id)
 );
 
+GO
 INSERT INTO Images(imageName, imageMIME, imageBin) VALUES ('Missing', 'image/jpeg', 0x00);
 
+GO 
 CREATE TABLE People (
 	id INT IDENTITY(1,1),
 	fname VARCHAR(32) CHECK (len(fname) > 1),
@@ -31,6 +27,7 @@ CREATE TABLE People (
 	CONSTRAINT pk_people PRIMARY KEY (id)
 );
 
+GO 
 CREATE TABLE Genre(
 	id INT IDENTITY(1,1),
 	gname VARCHAR(64) NOT NULL,
@@ -38,6 +35,7 @@ CREATE TABLE Genre(
 	CONSTRAINT pk_genre PRIMARY KEY (id)
 );
 
+GO 
 CREATE TABLE Movies (
 	id int IDENTITY(1,1),
 	title varchar(64) NOT NULL,
@@ -51,6 +49,7 @@ CREATE TABLE Movies (
 	CONSTRAINT fk_movie_image FOREIGN KEY (coverArt) REFERENCES Images(id)
 );
 
+GO 
 CREATE TABLE Movie_Genres (
 	movie INT,
 	genre INT,
@@ -60,6 +59,7 @@ CREATE TABLE Movie_Genres (
 	CONSTRAINT fk_movie_genre_genre FOREIGN KEY (genre) REFERENCES Genre(id),
 );
 
+GO 
 CREATE TABLE Actors (
 	person INT,
 	movie INT,
@@ -71,6 +71,7 @@ CREATE TABLE Actors (
 );
 
 -- AUTH
+GO 
 CREATE TABLE Users(
 	id INT IDENTITY(1,1),
 	email VARCHAR(32) CHECK (
@@ -87,6 +88,7 @@ CREATE TABLE Users(
 
 -- REVIEWS
 
+GO 
 CREATE TABLE Reviews (
 	movie INT,
 	id INT,

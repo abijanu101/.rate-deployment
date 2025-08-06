@@ -13,7 +13,7 @@ function Navbar() {
     return (
         <header className="w-full bg-gradient-to-r h-12 from-teal-700 to-green-600/85 text-white text-center font-thin p-2 z-50">
             <div className="flex gap-5 text-xl">
-                <Link className="flex gap-2" to="/home/">
+                <Link className="flex gap-2" to="/">
                     <BsRecord2 className="mt-0.5 text-2xl" />
                     <div className="w-0.5 bg-white/70"></div>
                 </Link>

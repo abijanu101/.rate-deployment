@@ -1,0 +1,18 @@
+name: express
+image: abijanu101/dr-express
+replicaCount: 1
+
+port: 3000
+containerPort: 3000
+
+env:
+  config:
+    PORT: 3000
+    DB_USER: sa
+    DB_PORT: 1433
+    DB_SERVER: sql
+    DB_DATABASE: dotRate
+    DB_ENCRYPT: false
+  secrets:
+    DB_PASSWORD: Qwerty123
+    JWT_SECRET: doNotChange

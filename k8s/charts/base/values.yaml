@@ -1,0 +1,12 @@
+name: db
+image: 
+replicaCount: 1
+
+port: 80
+containerPort: 80
+
+env:
+  config:
+  secrets:
+initContainers:
+jobs:

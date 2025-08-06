@@ -1,0 +1,11 @@
+name: react
+image: abijanu101/dr-react
+replicaCount: 1
+
+port: 80
+containerPort: 80
+
+env:
+  config:
+    VITE_BACKENDURL: /api
+  secrets:

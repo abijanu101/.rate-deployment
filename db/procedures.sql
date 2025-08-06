@@ -1,5 +1,5 @@
 USE dotRate;
-SELECT * FROM Reviews;
+GO;
 -- ============ Insertion Procedures ============ 
 
 -- Inserts a new person into the People table

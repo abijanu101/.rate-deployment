@@ -76,6 +76,7 @@ router.get('/', async (req, res) => {
     res.json(result.recordset);
   } catch (err) {
     res.status(500).send(err.message);
+    console.error(err);
   }
 });
 
