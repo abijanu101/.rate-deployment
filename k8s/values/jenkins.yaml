@@ -1,0 +1,4 @@
+controller:
+  serviceType: LoadBalancer
+  admin:
+    password: "Qwerty123"

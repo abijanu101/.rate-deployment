@@ -1,9 +1,13 @@
 name: express
-image: abijanu101/dr-express
+image: 
+  repository: abijanu101/dr-express
+  tag: latest
+  pullPolicy: Always
 replicaCount: 1
 
-port: 3000
-containerPort: 3000
+ports:
+- servicePort: 3000
+  containerPort: 3000
 
 env:
   config:

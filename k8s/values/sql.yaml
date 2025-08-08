@@ -1,9 +1,12 @@
 name: sql
-image: mcr.microsoft.com/mssql/server:2019-latest
+image: 
+  repository: mcr.microsoft.com/mssql/server
+  tag: 2019-latest
 replicaCount: 1
 
-port: 1433
-containerPort: 1433
+ports: 
+- servicePort: 1433
+  containerPort: 1433
 
 env:
   config:

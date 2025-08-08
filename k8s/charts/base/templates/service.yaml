@@ -3,8 +3,12 @@ kind: Service
 metadata:
   name: {{.Values.name}}
 spec:
+  type: {{.Values.serviceType}}
   selector:
     app: {{.Values.name}}
   ports:
-  - port: {{.Values.port }}
-    targetPort: {{.Values.containerPort}}
+  {{- range $key, $val := .Values.ports}}
+  - name: {{ $.Values.name}}-port-{{ $key }}
+    port: {{ .servicePort }}
+    targetPort: {{ .containerPort }}
+  {{- end }}

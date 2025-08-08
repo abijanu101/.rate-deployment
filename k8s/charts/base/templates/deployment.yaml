@@ -14,9 +14,12 @@ spec:
     spec:
       containers:
       - name: {{ .Values.name }}
-        image: {{ .Values.image }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
-        - containerPort: {{ .Values.containerPort }}
+        {{- range .Values.ports }}
+        - containerPort: {{ .containerPort }}
+        {{- end }}
         env:
           {{- range $key, $val := .Values.env.config}}
           - name: {{ $key | quote }}

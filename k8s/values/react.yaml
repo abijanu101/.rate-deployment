@@ -1,9 +1,13 @@
 name: react
-image: abijanu101/dr-react
+image: 
+  repository: abijanu101/dr-react
+  tag: latest
+  pullPolicy: Always
 replicaCount: 1
 
-port: 80
-containerPort: 80
+ports:
+- servicePort: 80
+  containerPort: 80
 
 env:
   config:
