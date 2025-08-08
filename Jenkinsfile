@@ -15,6 +15,7 @@ pipeline {
         docker {
           image 'docker'
           reuseNode true
+          args '-v /var/run/docker.sock:/var/run/docker.sock'
           }
         }
       steps { 
@@ -28,6 +29,7 @@ pipeline {
         docker {
           image 'docker'
           reuseNode true
+          args '-v /var/run/docker.sock:/var/run/docker.sock'
           }
         }
       steps { 
@@ -42,7 +44,7 @@ pipeline {
     stage('Deploy') {
       agent { 
         docker {
-          image 'bitnami/kubectl'
+          image 'alpine/helm'
           reuseNode true
           }
         }
