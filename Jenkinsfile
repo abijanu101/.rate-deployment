@@ -2,7 +2,7 @@ pipeline {
   agent any
   stages {
     stage('Clone') {
-      steps { git 'https://github.com/abijanu101/dotrate-deployment.git' }
+      steps { git 'https://github.com/abijanu101/.rate-deployment.git' }
     }
     stage('Build') {
       steps { 
