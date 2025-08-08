@@ -28,7 +28,7 @@ spec:
     stage('Clone') {
       steps { 
         container('git'){
-          git 'https://github.com/abijanu101/dr-deployment.git' 
+          sh 'git clone https://github.com/abijanu101/dr-deployment.git' 
           }
         }
     }
