@@ -10,6 +10,7 @@ spec:
     image: bitnami/git
     command:
     - cat
+    tty: true
   - name: helm
     image: alpine/helm:3.14.0
     command:
