@@ -23,9 +23,9 @@ pipeline {
     }
     stage('Deploy') {
       steps {
+        sh 'helm upgrade --install sql ./k8s/charts/base -f sql.yaml'
         sh 'helm upgrade --install react ./k8s/charts/base -f react.yaml'
         sh 'helm upgrade --install express ./k8s/charts/base -f express.yaml'
-        sh 'helm upgrade --install sql ./k8s/charts/base -f sql.yaml'
       }
     }
     
