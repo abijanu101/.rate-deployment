@@ -1,8 +1,13 @@
 pipeline {
-  agent any
+  agent none
   stages {
     stage('Clone') {
-      agent any
+      agent { 
+        docker {
+          image 'bitnami/git'
+          reuseNode true
+        }
+      }
       steps { git 'https://github.com/abijanu101/dr-deployment.git' }
     }
     stage('Build') {
@@ -35,7 +40,7 @@ pipeline {
       }
     }
     stage('Deploy') {
-agent { 
+      agent { 
         docker {
           image 'bitnami/kubectl'
           reuseNode true
